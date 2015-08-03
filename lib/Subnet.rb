@@ -13,6 +13,8 @@ class Subnet
 
   # Creates instance of subnet. Makes sure that last >= first, otherwise shall swap them
   def initialize(first, last)
+    #TODO should we check both args has the same type?
+
     if last >= first
       @first = first
       @last = last

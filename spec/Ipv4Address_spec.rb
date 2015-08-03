@@ -96,12 +96,20 @@ RSpec.describe Ipv4Address, '#to_s' do
   it 'is string' do
     expect(Ipv4Address.new('192.168.1.1').to_s).to be_instance_of(String)
   end
+
+  it 'correct transformation'  do
+    expect(Ipv4Address.new(1365187330).to_s).to eq('81.95.27.2')
+  end
 end
 
 
 RSpec.describe Ipv4Address, '#to_i' do
   it 'is integer' do
     expect(Ipv4Address.new('192.168.1.1').to_i).to be_a_kind_of(Numeric)
+  end
+
+  it 'correct transformation'  do
+    expect(Ipv4Address.new('81.95.27.2').to_i).to eq(1365187330)
   end
 end
 
