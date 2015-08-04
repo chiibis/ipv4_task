@@ -4,6 +4,20 @@ require 'bundler/setup'
 require './../lib/iputils'
 include IpUtils
 
+addr2 = Ipv4Address.new(11)
+puts addr2.next
+
+addr1 = Ipv6Address.new(340282366920938463463374607431768211455)
+puts addr1.to_s
+
+addr1 = Ipv6Address.new(42540766416740939402060931394078537309)
+puts addr1.to_s
+
+
+
+addr1 = Ipv6Address.new('2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d')
+puts addr1.to_i
+
 
 
 =begin

@@ -1,6 +1,7 @@
 # Represents single valid IPv4 address
 class Ipv4Address
   include Comparable
+  include IpAddress
 
   # @param numeric - may be integer (integer presentation of ipv4 address) or string (like "127.0.0.1")
   # @raise ArgumentError if parameter is not valid
@@ -40,58 +41,6 @@ class Ipv4Address
 
   end
 
-  # Returns next IPv4 address (new object) or RuntimeError if not exist
-  def next
-    if self.class.is_valid_nr(@as_num + 1)
-      Ipv4Address.new(@as_num + 1)
-    else
-      raise RuntimeError.new('Error: IP is out of range')
-    end
-  end
-
-  # Returns previous IPv4 address (new object) or RuntimeError if not exist
-  def prev
-    # Ipv4Address.new(@as_num - 1)
-    if self.class.is_valid_nr(@as_num - 1)
-      Ipv4Address.new(@as_num - 1)
-    else
-      raise RuntimeError.new('Error: IP is out of range')
-    end
-  end
-
-  # Returns string representation of ip address
-  def to_s
-    @as_str
-  end
-
-  # Returns integer representation of ip address
-  def to_i
-    @as_num
-  end
-
-  # Compares 2 ip addresses
-  def <=>(another_addr)
-    to_i <=> another_addr.to_i
-  end
-
-  # Returns amount of addresses between 2 addresses including them. (addr - addr == 1)
-  def -(another_addr)
-    (to_i - another_addr.to_i).abs + 1
-  end
-
-  # Returns next step-th ip address
-  def +(step)
-    if self.class.is_valid_nr(@as_num + step)
-      Ipv4Address.new(@as_num + step)
-    else
-      raise RuntimeError.new('Error: IP is out of range')
-    end
-  end
-
-  # used for tests only
-  def testing_is_valid_nr
-    self.class.is_valid_nr(@as_num)
-  end
 
   alias_method :succ, :next    #to support ranges
 
