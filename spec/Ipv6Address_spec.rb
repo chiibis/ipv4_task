@@ -1,9 +1,9 @@
 require 'iputils'
 
 =begin
+
 340282366920938463463374607431768211455
 ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
-
 
 42540766416740939402060931394078537309
 2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d
@@ -11,10 +11,34 @@ ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
 42540766416740939402060931394078537308
 2001:0db8:11a3:09d7:1f34:8a2e:07a0:765c
 
-
 0000:0000:0000:0000:0000:0000:0000:0000
 0
+
 =end
+
+RSpec.describe Ipv6Address, "#add_missing_hextets" do
+  test_ip = Ipv6Address.new(0)
+
+
+  context 'one hextet missing' do
+    str = '2001:0db8:11a3::1f34:8a2e:07a0:765d'
+
+    it 'replace missing with zeros' do
+      expect(test_ip.class.add_missing_hextets(str)).to eq('2001:0db8:11a3:0000:1f34:8a2e:07a0:765d')
+    end
+  end
+
+  context 'many hextets are missing' do
+    it 'replace missing with zeros' do
+      expect(test_ip.class.add_missing_hextets('2001:db8::ae21:ad12')).to eq('2001:db8:0000:0000:0000:0000:ae21:ad12')
+      expect(test_ip.class.add_missing_hextets('::ae21:ad12')).to eq('0000:0000:0000:0000:0000:0000:ae21:ad12')
+      expect(test_ip.class.add_missing_hextets('ffff::')).to eq('ffff:0000:0000:0000:0000:0000:0000:0000')
+      expect(test_ip.class.add_missing_hextets('::')).to eq('0000:0000:0000:0000:0000:0000:0000:0000')
+    end
+
+  end
+
+end
 
 
 RSpec.describe Ipv6Address, "#initialize" do
@@ -22,7 +46,7 @@ RSpec.describe Ipv6Address, "#initialize" do
 
     it 'correct num value' do
       expect(Ipv6Address.new('0000:0000:0000:0000:0000:0000:0000:0000').to_i).to eq(0)
-      #  TODO: add with :: addresses
+      expect(Ipv6Address.new('::').to_i).to eq(0)
       expect(Ipv6Address.new('2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d').to_i).to eq(42540766416740939402060931394078537309)
       expect(Ipv6Address.new('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff').to_i).to eq(340282366920938463463374607431768211455)
     end
@@ -56,6 +80,10 @@ RSpec.describe Ipv6Address, "#string_to_numeric" do
 
   context 'throws exception' do
 
+    it 'has more than one ::' do
+      expect {test_ip.class.string_to_numeric('2001:0db8::09d7:1f34::07a0:765d')}.to raise_exception(ArgumentError)
+    end
+
     it 'invalid symbols' do
       expect {test_ip.class.string_to_numeric('2001:0db8:zzzz:09d7:1f34:8a2e:07a0:765d')}.to raise_exception(ArgumentError)
     end
@@ -66,6 +94,7 @@ RSpec.describe Ipv6Address, "#string_to_numeric" do
     end
 
   end
+
 end
 
 
@@ -142,7 +171,8 @@ RSpec.describe Ipv6Address, '#is_valid_nr' do
     expect(Ipv6Address.new('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff').testing_is_valid_nr).to be_truthy
 
     expect(Ipv6Address.new('2001:0db8::09d7:1f34:8a2e:07a0:765d').testing_is_valid_nr).to be_truthy
-    expect(Ipv6Address.new('2001:0db8::09d7:1f34::07a0:765d').testing_is_valid_nr).to be_truthy
+    expect(Ipv6Address.new('::765d').testing_is_valid_nr).to be_truthy
+    expect(Ipv6Address.new('2001:0db8::').testing_is_valid_nr).to be_truthy
   end
 
 end

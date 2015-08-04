@@ -4,19 +4,37 @@ require 'bundler/setup'
 require './../lib/iputils'
 include IpUtils
 
-addr2 = Ipv4Address.new(11)
-puts addr2.next
 
-addr1 = Ipv6Address.new(340282366920938463463374607431768211455)
-puts addr1.to_s
-
-addr1 = Ipv6Address.new(42540766416740939402060931394078537309)
-puts addr1.to_s
+# addr = Ipv4Address.new('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')
+# puts addr.to_s
 
 
+str = '2001:db8::ae21:ad12'
+#  2001:0db8:0000:0000:0000:0000:ae21:ad12
 
-addr1 = Ipv6Address.new('2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d')
-puts addr1.to_i
+# str.gsub! '::', ':0000:'
+
+
+# puts parts
+
+
+parts = str.split('::')
+missing_hextets_count = 8
+
+parts.each { |part| missing_hextets_count -= part.split(':').length }
+missing_part = ':0000:' * missing_hextets_count
+
+str.gsub! '::', missing_part
+str.gsub! '::',':'
+str.sub!(/^:/, '').sub!(/:$/,'')
+
+
+
+
+puts str
+
+
+
 
 
 
