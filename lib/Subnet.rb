@@ -42,11 +42,19 @@ class Subnet
   # Returns an array of <c>parts</c> subnets. All subnets except last shall have same size, last one could be smaller.
   # All ip addresses from this subnet shall be used in the returned subnets set
   def split_on(parts)
+
+    raise ArgumentError.new("Parts should be FixNum.") if not parts.is_a? Integer
+    raise ArgumentError.new("Subnet has #{size} elements only.") if parts > size
+
     part_size = size / parts
+
     subnets = []
     iter = first
     parts.times do
       iter_next = iter + part_size
+
+      # last part should be smaller
+      iter_next = last if iter_next > last
       subnets << Subnet.new(iter, iter_next)
       iter = iter_next + 1
     end
