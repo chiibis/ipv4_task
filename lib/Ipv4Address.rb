@@ -1,7 +1,7 @@
 # Represents single valid IPv4 address
 class Ipv4Address
   include Comparable
-  include IpAddress
+  include SubnetAddress
 
   # @param numeric - may be integer (integer presentation of ipv4 address) or string (like "127.0.0.1")
   # @raise ArgumentError if parameter is not valid
@@ -20,20 +20,27 @@ class Ipv4Address
         octets.unshift num % 256
         num = num / 256
       end
-      @as_str = octets.join(".")
+      @as_str = octets.join('.')
     end
   end
 
   # Converts string presentation of ipv4 address to numeric
   def self.string_to_numeric(str)
+    octets = []
 
-    raise ArgumentError.new("'#{str}' is not valid IPv4 address") if not /^[0-9\.]+$/ === str
+    raise ArgumentError.new("'#{str}' is not valid IPv4 address") unless /^[0-9\.]+$/ === str
 
-    octets = str.split(".").map{|i| i.to_i}
+    str.split('.').map do |text_oct|
+      oct = text_oct.to_i
+
+      if  oct > 255 or not /^[0-9]{1,3}$/ === text_oct
+        raise ArgumentError.new("'#{str}' is not valid IPv4 address")
+      end
+
+      octets.push oct
+    end
 
     raise ArgumentError.new("'#{str}' is not valid IPv4 address") if octets.length != 4
-
-    octets.each { |oct| raise ArgumentError.new("'#{str}' is not valid IPv4 address") if oct > 255}
 
     num = (octets[0]<< 24) + (octets[1]<< 16) + (octets[2]<< 8) + (octets[3])
 

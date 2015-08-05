@@ -40,8 +40,10 @@ RSpec.describe Ipv4Address, "#string_to_numeric" do
 
   context 'throws exception' do
 
-    it 'invalid symbols' do
+    it 'invalid format' do
       expect {test_ip.class.string_to_numeric('192.abbb.0.1')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
+      expect {test_ip.class.string_to_numeric('1.1.00000.000001')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
+      expect {test_ip.class.string_to_numeric('1...1')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
     end
 
     it 'too few octets' do
@@ -84,7 +86,7 @@ RSpec.describe Ipv4Address, "#-(another)" do
 end
 
 
-RSpec.describe Ipv4Address, "#<=>" do
+RSpec.describe Ipv4Address, '#<=>' do
   it 'main success' do
     expect(Ipv4Address.new('192.168.1.1') <=> Ipv4Address.new('192.168.1.1')).to equal(0)
     expect(Ipv4Address.new('192.168.1.0') <=> Ipv4Address.new('192.168.1.3')).to equal(-1)

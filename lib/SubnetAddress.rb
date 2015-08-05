@@ -1,6 +1,6 @@
 # represents common parts of each IpAddress realization
 
-module IpAddress
+module SubnetAddress
 
   # Returns next IPv4 address (new object) or RuntimeError if not exist
   def next

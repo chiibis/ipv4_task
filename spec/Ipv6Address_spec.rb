@@ -50,7 +50,7 @@ RSpec.describe Ipv6Address, "#initialize" do
       expect(Ipv6Address.new('0000:0000:0000:0000:0000:0000:0000:0000').to_i).to eq(0)
       expect(Ipv6Address.new('::').to_i).to eq(0)
       expect(Ipv6Address.new('2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d').to_i).to eq(42540766416740939402060931394078537309)
-      expect(Ipv6Address.new('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff').to_i).to eq(340282366920938463463374607431768211455)
+      expect(Ipv6Address.new('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff').to_i).to eq(256**16-1)
     end
 
   end
@@ -79,7 +79,12 @@ RSpec.describe Ipv6Address, "#string_to_numeric" do
   it 'convert correctly' do
     expect(test_ip.class.string_to_numeric('0000:0000:0000:0000:0000:0000:0000:0000')).to eq(0)
     expect(test_ip.class.string_to_numeric('2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d')).to eq(42540766416740939402060931394078537309)
-    expect(test_ip.class.string_to_numeric('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')).to eq(340282366920938463463374607431768211455)
+    expect(test_ip.class.string_to_numeric('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')).to eq(256**16-1)
+
+  end
+
+  it 'handle Upper case' do
+    expect(test_ip.class.string_to_numeric('FFFF:ffff:ffff:ffff:ffff:ffff:ffff:ffff')).to eq(256**16-1)
   end
 
   context 'throws exception' do
@@ -89,14 +94,16 @@ RSpec.describe Ipv6Address, "#string_to_numeric" do
       expect {test_ip.class.string_to_numeric(ip)}.to raise_exception(ArgumentError, /is not valid IPv6 address/)
     end
 
-    it 'invalid symbols' do
+    it 'invalid formats' do
       ip = '2001:0db8:zzzz:09d7:1f34:8a2e:07a0:765d'
       expect {test_ip.class.string_to_numeric(ip)}.to raise_exception(ArgumentError, /is not valid IPv6 address/)
+      expect {test_ip.class.string_to_numeric('1:::')}.to raise_exception(ArgumentError, /is not valid IPv6 address/)
+      expect {test_ip.class.string_to_numeric('0000001::')}.to raise_exception(ArgumentError, /is not valid IPv6 address/)
+      expect {test_ip.class.string_to_numeric(':::::::')}.to raise_exception(ArgumentError, /is not valid IPv6 address/)
     end
 
     it 'too few octets' do
       ip = '2001:0db8:11a3:1f34:8a2e:07a0:765d'
-      expect {test_ip.class.string_to_numeric(':::::::')}.to raise_exception(ArgumentError, /is not valid IPv6 address/)
       expect {test_ip.class.string_to_numeric(ip)}.to raise_exception(ArgumentError, /is not valid IPv6 address/)
     end
 

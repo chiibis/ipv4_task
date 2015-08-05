@@ -28,7 +28,7 @@ class Subnet
 
   # Returns true if specified address is included into subnet
   def includes?(addr)
-    first < addr and addr <= last
+    first <= addr and addr <= last
   end
 
   # Returns true if there are ip addresses which present in both this and provided subnets
@@ -45,7 +45,7 @@ class Subnet
   # All ip addresses from this subnet shall be used in the returned subnets set
   def split_on(parts)
 
-    raise ArgumentError.new("Parts should be FixNum.") if not parts.is_a? Integer
+    raise ArgumentError.new("Parts should be Integer greater than 0.") unless parts.is_a? Integer and parts > 0
     raise ArgumentError.new("Subnet has #{size} elements only.") if parts > size
 
     part_size = size / parts

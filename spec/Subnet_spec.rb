@@ -52,9 +52,11 @@ RSpec.describe Subnet, '#split_on' do
     subnet = Subnet.new(0,10)
 
     it 'raise exception' do
+      expect{subnet.split_on(0)}.to raise_exception(ArgumentError)
+      expect{subnet.split_on(-1)}.to raise_exception(ArgumentError)
+      expect{subnet.split_on(nil)}.to raise_exception(ArgumentError)
       expect{subnet.split_on(7.24)}.to raise_exception(ArgumentError)
       expect{subnet.split_on('Zorro')}.to raise_exception(ArgumentError)
-      expect{subnet.split_on(nil)}.to raise_exception(ArgumentError)
     end
 
   end
@@ -163,15 +165,15 @@ RSpec.describe Subnet, '#include' do
   subnet = Subnet.new(12, 36)
 
   it 'includes' do
-    expect(subnet.includes?(13)).to be_truthy
+    expect(subnet.includes?(12)).to be_truthy
     expect(subnet.includes?(25)).to be_truthy
     expect(subnet.includes?(36)).to be_truthy
   end
 
   it "doesn't include" do
-    expect(subnet.includes?(12)).to be_falsey
-    expect(subnet.includes?(37)).to be_falsey
     expect(subnet.includes?(0)).to be_falsey
+    expect(subnet.includes?(11)).to be_falsey
+    expect(subnet.includes?(37)).to be_falsey
   end
 
 end
@@ -207,12 +209,9 @@ RSpec.describe Subnet, '#intersects?' do
       expect(subnet_global.intersects?(subnet_left)).to be_truthy
       expect(subnet_global.intersects?(subnet_middle)).to be_truthy
       expect(subnet_global.intersects?(subnet_right)).to be_truthy
+      expect(subnet_global.intersects?(Subnet.new(0,0))).to be_truthy
 
       expect(subnet_global.intersects?(Subnet.new(255, 0))).to be_truthy
-    end
-
-    it "doesn't intersects" do
-      expect(subnet_global.intersects?(Subnet.new(0,0))).to be_falsey
     end
 
   end

@@ -2,7 +2,7 @@
 
 class Ipv6Address
   include Comparable
-  include IpAddress
+  include SubnetAddress
 
   # @param numeric - may be integer (integer presentation of ipv4 address) or string (like "127.0.0.1")
   # @raise ArgumentError if parameter is not valid
@@ -43,17 +43,29 @@ class Ipv6Address
 
 
   def self.string_to_numeric(str)
+    num = 0
+    hextets = []
 
-    raise ArgumentError.new("'#{str}' is not valid IPv6 address") if str.scan(/::/).length > 1
-    raise ArgumentError.new("'#{str}' is not valid IPv6 address") if not /^[0-9a-f:]+$/ === str
+
+    # to lower case
+    str.downcase!
+
+    # test str is valid ip
+    if str.scan(/:{3,}/).length > 0 or str.scan(/::/).length > 1 or not /^[0-9a-f:]+$/ === str
+      raise ArgumentError.new("'#{str}' is not valid IPv6 address")
+    end
 
     str = add_missing_hextets(str)
 
-    hextets = str.split(":").map{|i| i.to_i(16)}
+    str.split(":").map do |hex|
+      # test each hextet has 4 or less symbols
+      raise ArgumentError.new("'#{str}' is not valid IPv6 address") unless /^[0-9a-f]{1,4}$/ === hex
+      hextets.push hex.to_i(16)
+    end
 
     raise ArgumentError.new("'#{str}' is not valid IPv6 address") if hextets.length != 8
 
-    num = 0
+    # convert to int
     hextets.each_with_index { |hex, index| num += hex << 112 - 16 * index }
 
     raise ArgumentError.new("'#{str}' is not valid IPv6 address") unless is_valid_nr(num)
