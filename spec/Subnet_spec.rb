@@ -125,6 +125,15 @@ end
 
 RSpec.describe Subnet, '#initialize' do
 
+  context 'args has different type' do
+    it 'raises TypeError' do
+      ipv4 = Ipv4Address.new(0)
+      ipv6 = Ipv6Address.new(1)
+
+      expect{Subnet.new(ipv4, ipv6)}.to raise_error(TypeError,"Can't create subnet with different type of addresses")
+    end
+  end
+
   context 'last >= first ' do
     it 'correct subnet' do
       subnet = Subnet.new(0, 11)

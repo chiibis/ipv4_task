@@ -21,8 +21,9 @@ RSpec.describe Ipv4Address, "#initialize" do
     end
 
     it 'throws ex if invalid value' do
-      expect{Ipv4Address.new(4294967296)}.to raise_exception(ArgumentError)
-      expect{Ipv4Address.new(-111)}.to raise_exception(ArgumentError)
+      expect{Ipv4Address.new(4294967296)}.to raise_exception(ArgumentError, /is not valid IPv4 numeric representation/)
+      expect{Ipv4Address.new(-111)}.to raise_exception(ArgumentError, /is not valid IPv4 numeric representation/)
+      expect{Ipv4Address.new(nil)}.to raise_exception(ArgumentError, /is not valid IPv4 numeric representation/)
     end
   end
 end
@@ -40,16 +41,16 @@ RSpec.describe Ipv4Address, "#string_to_numeric" do
   context 'throws exception' do
 
     it 'invalid symbols' do
-      expect {test_ip.class.string_to_numeric('192.abbb.0.1')}.to raise_exception(ArgumentError)
+      expect {test_ip.class.string_to_numeric('192.abbb.0.1')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
     end
 
     it 'too few octets' do
-      expect {test_ip.class.string_to_numeric('....')}.to raise_exception(ArgumentError)
-      expect {test_ip.class.string_to_numeric('192.168.0')}.to raise_exception(ArgumentError)
+      expect {test_ip.class.string_to_numeric('....')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
+      expect {test_ip.class.string_to_numeric('192.168.0')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
     end
 
     it 'octet is greater, than 255' do
-      expect {test_ip.class.string_to_numeric('192.168.999.0')}.to raise_exception(ArgumentError)
+      expect {test_ip.class.string_to_numeric('192.168.999.0')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
     end
   end
 end

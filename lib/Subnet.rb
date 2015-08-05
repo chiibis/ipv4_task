@@ -13,7 +13,9 @@ class Subnet
 
   # Creates instance of subnet. Makes sure that last >= first, otherwise shall swap them
   def initialize(first, last)
-    #TODO should we check both args has the same type?
+
+    # test both args has same type
+    raise TypeError.new("Can't create subnet with different type of addresses") unless first.is_a? last.class
 
     if last >= first
       @first = first

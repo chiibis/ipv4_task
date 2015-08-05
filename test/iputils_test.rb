@@ -4,6 +4,8 @@ require 'bundler/setup'
 require './../lib/iputils'
 include IpUtils
 
+# TODO: obsolete draft file. Remove it when features are ready.
+
 
 # addr = Ipv4Address.new('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')
 # puts addr.to_s
@@ -28,15 +30,7 @@ str.gsub! '::', missing_part
 str.gsub! '::',':'
 str.sub!(/^:/, '').sub!(/:$/,'')
 
-
-
-
 puts str
-
-
-
-
-
 
 =begin
 

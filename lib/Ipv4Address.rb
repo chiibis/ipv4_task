@@ -11,6 +11,7 @@ class Ipv4Address
       @as_num = self.class.string_to_numeric(numeric)
       @as_str = numeric
     else
+      raise ArgumentError.new("'#{numeric}' is not valid IPv4 numeric representation") unless numeric
       raise ArgumentError.new("'#{numeric}' is not valid IPv4 numeric representation") unless self.class.is_valid_nr(numeric)
       @as_num = numeric
       octets = []
