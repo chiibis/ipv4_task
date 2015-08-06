@@ -28,6 +28,8 @@ class Subnet
 
   # Returns true if specified address is included into subnet
   def includes?(addr)
+    raise TypeError.new("Can accept #{first.class} type only") unless first.is_a? addr.class
+
     first <= addr and addr <= last
   end
 
@@ -41,25 +43,36 @@ class Subnet
     (@first..@last).each {|addr| yield addr}
   end
 
-  # Returns an array of <c>parts</c> subnets. All subnets except last shall have same size, last one could be smaller.
+  # Returns an array of <c>parts</c> subnets. All subnets except last shall have same size, last one should be smaller
+  # if possible. If not, it can be greater.
   # All ip addresses from this subnet shall be used in the returned subnets set
   def split_on(parts)
 
     raise ArgumentError.new("Parts should be Integer greater than 0.") unless parts.is_a? Integer and parts > 0
     raise ArgumentError.new("Subnet has #{size} elements only.") if parts > size
 
-    part_size = size / parts
+    if size % parts == 0
+      part_size = size / parts
+    else
+      part_size = size / (parts - 1)
+      if size % part_size == 0 and part_size > 1
+        part_size -= 1
+      end
+    end
 
     subnets = []
     iter = first
-    parts.times do
-      iter_next = iter + part_size
+
+    parts.times do |i|
+      iter_next = iter + (part_size - 1)
 
       # last part should be smaller
-      iter_next = last if iter_next > last
+      iter_next = last if iter_next > last or i + 1 == parts
+
       subnets << Subnet.new(iter, iter_next)
       iter = iter_next + 1
     end
+
     subnets
   end
 
