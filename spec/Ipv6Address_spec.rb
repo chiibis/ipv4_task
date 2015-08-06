@@ -65,6 +65,9 @@ RSpec.describe Ipv6Address, "#string_to_numeric" do
     expect(test_ip.class.string_to_numeric('2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d')).to eq(42540766416740939402060931394078537309)
     expect(test_ip.class.string_to_numeric('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')).to eq(256**16-1)
     expect(test_ip.class.string_to_numeric('::7')).to eq(7)
+    expect(test_ip.class.string_to_numeric('FABC::FABC')).to eq(333283150755633515820115498379979586236)
+    expect(test_ip.class.string_to_numeric('::FFFF')).to eq(2**16-1)
+
   end
 
   it 'handle Upper case' do

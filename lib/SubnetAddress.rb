@@ -39,11 +39,6 @@ module SubnetAddress
     @as_num
   end
 
-  # used for tests only
-  def testing_is_valid_nr
-    self.class.is_valid_nr(@as_num)
-  end
-
   # Compares 2 ip addresses
   def <=>(another_addr)
     to_i <=> another_addr.to_i
