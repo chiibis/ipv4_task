@@ -6,12 +6,14 @@ All test should use instance of DummyAddress as arguments
 
 =end
 
+# TODO: DummyAddress.new(0) можно заменить на метод-хелпер, например address(int) - просто запись будет короче и понятнее
+# TODO: - многие it не читаются
 
 RSpec.describe Subnet, '#split_on' do
 
   it 'returns array of Subnets' do
     subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(5))
-    expect(subnet.split_on(3)[0]).to be_a_kind_of(Subnet)
+    expect(subnet.split_on(3)[0]).to be_a_kind_of(Subnet) # TODO: сомнительно, если этот кейс не будет работать - упадут вообще все тесты. Всё равно что проверять а есть ли такой-то метод в этом классе.
   end
 
   context 'can split into equal parts' do
@@ -60,7 +62,7 @@ RSpec.describe Subnet, '#split_on' do
 
     it 'correct split (part size = 1 )' do
       subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(5))
-      splitted = subnet.split_on(5)
+      splitted = subnet.split_on(5) # TODO: чем в этом тесте 5 адресов лучше чем 3, кроме того что занимают больше места?
 
       expect(splitted.length).to eq(5)
 
@@ -71,8 +73,8 @@ RSpec.describe Subnet, '#split_on' do
       expect(splitted[4].to_s).to eq(Subnet.new(DummyAddress.new(4),DummyAddress.new(5)).to_s)
     end
 
-
-    it 'correct split (prime number)' do
+    
+    it 'correct split (prime number)' do # TODO: что за кейс? о_О
       subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(10))
       splitted = subnet.split_on(7)
 
@@ -99,7 +101,7 @@ RSpec.describe Subnet, '#split_on' do
 
   end
 
-  context 'parts is not integer ' do
+  context 'parts is not integer ' do # TODO: context врёт, ведь 0 и -1 - вполне себе integer'ы
     subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(10))
 
     it 'raise exception' do
@@ -117,14 +119,14 @@ RSpec.describe Subnet, '#split_on' do
 
     it 'correct split' do
       expect(subnet.split_on(11).length).to eq(11)
-      expect(subnet.split_on(11)[3].size).to eq(1)
+      expect(subnet.split_on(11)[3].size).to eq(1) # TODO: ассерт "по пути"?
     end
 
   end
 
 end
 
-
+# TODO: граничный случай?
 RSpec.describe Subnet, '#each' do
 
   subnet = Subnet.new(DummyAddress.new(1),DummyAddress.new(6))
@@ -145,7 +147,7 @@ RSpec.describe Subnet, '#to_s' do
 
   context 'hardcoded output' do
     it 'context output' do
-      expect(Subnet.new(DummyAddress.new(2),DummyAddress.new(12)).to_s).to eq('2-12')
+      expect(Subnet.new(DummyAddress.new(2),DummyAddress.new(12)).to_s).to eq('2-12') # TODO: граничный случай?
     end
   end
 
@@ -153,7 +155,7 @@ RSpec.describe Subnet, '#to_s' do
     it 'context output' do
       first = DummyAddress.new(2)
       last = DummyAddress.new(12)
-      expect(Subnet.new(first,last).to_s).to eq(first.to_s + '-' + last.to_s)
+      expect(Subnet.new(first,last).to_s).to eq(first.to_s + '-' + last.to_s) # TODO: дублируется логика тестируемого метода, лучше писать явно
     end
   end
 
@@ -164,7 +166,7 @@ RSpec.describe Subnet, '#size' do
 
   context 'with normal subnet' do
     it 'size is correct' do
-      expect(Subnet.new(DummyAddress.new(0), DummyAddress.new(3)).size).to eq(4)
+      expect(Subnet.new(DummyAddress.new(0), DummyAddress.new(3)).size).to eq(4) # TODO: граничный случай?
     end
   end
 
@@ -176,15 +178,15 @@ RSpec.describe Subnet, '#size' do
   end
 
 end
-
+# TODO: почему бы тесты на конструктор не поместить в самом верху?
 RSpec.describe Subnet, '#initialize' do
 
   context 'args has different type' do
     it 'raises TypeError' do
       addr = DummyAddress.new(0)
-      other_type_addr = Ipv6Address.new(1)
+      other_type_addr = Ipv6Address.new(1) # TODO: в TDD не прокатит
 
-      expect{Subnet.new(addr, other_type_addr)}.to raise_error(TypeError,"Can't create subnet with different type of addresses")
+      expect{Subnet.new(addr, other_type_addr)}.to raise_error(TypeError,"Can't create subnet with different type of addresses") # TODO: к сообщению лучше не привязываться - оно может поменяться
     end
   end
 
@@ -210,11 +212,13 @@ RSpec.describe Subnet, '#initialize' do
     end
   end
 
+  # TODO: initialize с nil?
 end
 
+ # TODO: граничные случаи?
 RSpec.describe Subnet, '#include' do
 
-  subnet = Subnet.new(DummyAddress.new(1), DummyAddress.new(10))
+  subnet = Subnet.new(DummyAddress.new(1), DummyAddress.new(10)) # TODO: слишком большая подсеть для этих кейсов
 
   it 'includes' do
     expect(subnet.includes?(DummyAddress.new(1))).to be_truthy
@@ -233,13 +237,13 @@ RSpec.describe Subnet, '#include' do
 
 end
 
-
+# TODO: граничные случаи?
 RSpec.describe Subnet, '#intersects?' do
 
   #   |subnet_left|      |subnet_right|
   #           |subnet_middle|
 
-  subnet_left = Subnet.new(DummyAddress.new(0), DummyAddress.new(3))
+  subnet_left = Subnet.new(DummyAddress.new(0), DummyAddress.new(3)) # TODO: можно подсети поменьше ;)
   subnet_middle = Subnet.new(DummyAddress.new(3), DummyAddress.new(6))
   subnet_right = Subnet.new(DummyAddress.new(6), DummyAddress.new(9))
 

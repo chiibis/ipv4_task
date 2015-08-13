@@ -4,7 +4,7 @@ class Ipv6Address
   include Comparable
   include SubnetAddress
 
-  # @param numeric - may be integer (integer presentation of ipv4 address) or string (like "127.0.0.1")
+  # @param numeric - may be integer (integer presentation of ipv4 address) or string (like "127.0.0.1") # TODO: не похоже на IPv6
   # @raise ArgumentError if parameter is not valid
   def initialize(numeric)
     if numeric.is_a? String
@@ -12,7 +12,7 @@ class Ipv6Address
       @as_str = numeric
     else
       raise ArgumentError.new("'#{numeric}' is not valid IPv6 numeric representation") unless numeric
-      raise ArgumentError.new("'#{numeric}' is not valid IPv6 numeric representation") unless self.class.is_valid_nr(numeric)
+      raise ArgumentError.new("'#{numeric}' is not valid IPv6 numeric representation") unless self.class.is_valid_nr(numeric) # TODO: нельзя обработать через "или" с пред выражением?
       @as_num = numeric
       hextets = []
       num = numeric
@@ -47,7 +47,7 @@ class Ipv6Address
     hextets = []
 
 
-    # to lower case
+    # to lower case - TODO: комментарий весьма очевидный, лучше убрать
     str.downcase!
 
     # test str is valid ip

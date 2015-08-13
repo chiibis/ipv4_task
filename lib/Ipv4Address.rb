@@ -12,7 +12,7 @@ class Ipv4Address
       @as_str = numeric
     else
       raise ArgumentError.new("'#{numeric}' is not valid IPv4 numeric representation") unless numeric
-      raise ArgumentError.new("'#{numeric}' is not valid IPv4 numeric representation") unless self.class.is_valid_nr(numeric)
+      raise ArgumentError.new("'#{numeric}' is not valid IPv4 numeric representation") unless self.class.is_valid_nr(numeric) # TODO: нельзя обработать через "или" с пред выражением?
       @as_num = numeric
       octets = []
       num = numeric
@@ -24,6 +24,7 @@ class Ipv4Address
     end
   end
 
+  # TODO: отступы практически после каждой строки - воздушненько :)
   # Converts string presentation of ipv4 address to numeric
   def self.string_to_numeric(str)
     octets = []
