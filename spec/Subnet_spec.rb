@@ -6,21 +6,52 @@ All test should use instance of DummyAddress as arguments
 
 =end
 
+
 # TODO: DummyAddress.new(0) можно заменить на метод-хелпер, например address(int) - просто запись будет короче и понятнее
-# TODO: - многие it не читаются
+
+
+RSpec.describe Subnet, '#initialize' do
+  context 'when args has different types' do
+    it 'raises TypeError' do
+      addr = DummyAddress.new(0)
+      other_type_addr = nil
+      expect{Subnet.new(addr, other_type_addr)}.to raise_error(TypeError)
+    end
+  end
+
+  context 'when last >= first ' do
+    it 'returns correct subnet' do
+      subnet = Subnet.new(DummyAddress.new(0), DummyAddress.new(2))
+      expect(subnet.first.to_s).to eq('0')
+      expect(subnet.last.to_s).to eq('2')
+    end
+  end
+
+  context 'when create single address subnet' do
+    it 'returns correct subnet' do
+      loopback = Subnet.new(DummyAddress.new(1), DummyAddress.new(1))
+      expect(loopback.first <=> loopback.last).to be_truthy
+      expect(loopback.first <=> 1).to be_truthy
+    end
+  end
+
+  context 'when first > last' do
+    it 'returns correct subnet' do
+      subnet = Subnet.new(DummyAddress.new(2), DummyAddress.new(0))
+      expect(subnet.first.to_s).to eq('0')
+      expect(subnet.last.to_s).to eq('2')
+    end
+  end
+end
+
 
 RSpec.describe Subnet, '#split_on' do
 
-  it 'returns array of Subnets' do
-    subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(5))
-    expect(subnet.split_on(3)[0]).to be_a_kind_of(Subnet) # TODO: сомнительно, если этот кейс не будет работать - упадут вообще все тесты. Всё равно что проверять а есть ли такой-то метод в этом классе.
-  end
-
-  context 'can split into equal parts' do
+  context 'when able to split into equal parts' do
     subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(5))
     splitted = subnet.split_on(3)
 
-    it 'correct split' do
+    it 'splits correctly' do
       expect(splitted.length).to eq(3)
 
       expect(splitted[0].to_s).to eq(Subnet.new(DummyAddress.new(0),DummyAddress.new(1)).to_s)
@@ -30,11 +61,11 @@ RSpec.describe Subnet, '#split_on' do
 
   end
 
-  context 'not equal parts, last is smaller' do
+  context 'when last part should be smaller' do
     subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(4))
     splitted = subnet.split_on(3)
 
-    it 'correct split' do
+    it 'splits correctly' do
       expect(splitted.length).to eq(3)
 
       expect(splitted[0].to_s).to eq(Subnet.new(DummyAddress.new(0),DummyAddress.new(1)).to_s)
@@ -44,89 +75,80 @@ RSpec.describe Subnet, '#split_on' do
 
   end
 
-  context 'not equal parts, last can not be smaller' do
+  context 'when last part can not be smaller' do
 
-    it 'correct split (part size > 1)' do
+    context 'when part size > 1' do
+      it 'splits correclty' do
+        subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(8))
+        splitted = subnet.split_on(4)
 
-      subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(8))
-      splitted = subnet.split_on(4)
+        expect(splitted.length).to eq(4)
 
-      expect(splitted.length).to eq(4)
-
-      expect(splitted[0].to_s).to eq(Subnet.new(DummyAddress.new(0),DummyAddress.new(1)).to_s)
-      expect(splitted[1].to_s).to eq(Subnet.new(DummyAddress.new(2),DummyAddress.new(3)).to_s)
-      expect(splitted[2].to_s).to eq(Subnet.new(DummyAddress.new(4),DummyAddress.new(5)).to_s)
-      expect(splitted[3].to_s).to eq(Subnet.new(DummyAddress.new(6),DummyAddress.new(8)).to_s)
+        expect(splitted[0].to_s).to eq(Subnet.new(DummyAddress.new(0),DummyAddress.new(1)).to_s)
+        expect(splitted[1].to_s).to eq(Subnet.new(DummyAddress.new(2),DummyAddress.new(3)).to_s)
+        expect(splitted[2].to_s).to eq(Subnet.new(DummyAddress.new(4),DummyAddress.new(5)).to_s)
+        expect(splitted[3].to_s).to eq(Subnet.new(DummyAddress.new(6),DummyAddress.new(8)).to_s)
+      end
     end
 
+    context 'when part size = 1' do
+      it 'splits correclty' do
+        subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(3))
+        splitted = subnet.split_on(3)
 
-    it 'correct split (part size = 1 )' do
-      subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(5))
-      splitted = subnet.split_on(5) # TODO: чем в этом тесте 5 адресов лучше чем 3, кроме того что занимают больше места?
+        expect(splitted.length).to eq(3)
 
-      expect(splitted.length).to eq(5)
-
-      expect(splitted[0].to_s).to eq(Subnet.new(DummyAddress.new(0),DummyAddress.new(0)).to_s)
-      expect(splitted[1].to_s).to eq(Subnet.new(DummyAddress.new(1),DummyAddress.new(1)).to_s)
-      expect(splitted[2].to_s).to eq(Subnet.new(DummyAddress.new(2),DummyAddress.new(2)).to_s)
-      expect(splitted[3].to_s).to eq(Subnet.new(DummyAddress.new(3),DummyAddress.new(3)).to_s)
-      expect(splitted[4].to_s).to eq(Subnet.new(DummyAddress.new(4),DummyAddress.new(5)).to_s)
+        expect(splitted[0].to_s).to eq(Subnet.new(DummyAddress.new(0),DummyAddress.new(0)).to_s)
+        expect(splitted[1].to_s).to eq(Subnet.new(DummyAddress.new(1),DummyAddress.new(1)).to_s)
+        expect(splitted[2].to_s).to eq(Subnet.new(DummyAddress.new(2),DummyAddress.new(3)).to_s)
+      end
     end
-
-    
-    it 'correct split (prime number)' do # TODO: что за кейс? о_О
-      subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(10))
-      splitted = subnet.split_on(7)
-
-      expect(splitted.length).to eq(7)
-
-      expect(splitted[0].to_s).to eq(Subnet.new(DummyAddress.new(0),DummyAddress.new(0)).to_s)
-      expect(splitted[1].to_s).to eq(Subnet.new(DummyAddress.new(1),DummyAddress.new(1)).to_s)
-      expect(splitted[2].to_s).to eq(Subnet.new(DummyAddress.new(2),DummyAddress.new(2)).to_s)
-      expect(splitted[3].to_s).to eq(Subnet.new(DummyAddress.new(3),DummyAddress.new(3)).to_s)
-      expect(splitted[4].to_s).to eq(Subnet.new(DummyAddress.new(4),DummyAddress.new(4)).to_s)
-      expect(splitted[5].to_s).to eq(Subnet.new(DummyAddress.new(5),DummyAddress.new(5)).to_s)
-      expect(splitted[6].to_s).to eq(Subnet.new(DummyAddress.new(6),DummyAddress.new(10)).to_s)
-    end
-
 
   end
 
-  context 'more parts than elements' do
-    subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(4))
-
-    it 'raise exception' do
+  context 'when passed <parts> param is greater than subnet size' do
+    it 'raises ArgumentError' do
+      subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(4))
       expect{subnet.split_on(6)}.to raise_exception(ArgumentError,/Subnet has.*elements only./)
     end
-
   end
 
-  context 'parts is not integer ' do # TODO: context врёт, ведь 0 и -1 - вполне себе integer'ы
+  context 'when passed <parts> param is not valid' do
     subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(10))
 
-    it 'raise exception' do
-      expect{subnet.split_on(0)}.to raise_exception(ArgumentError,/Parts should be Integer greater than 0./)
-      expect{subnet.split_on(-1)}.to raise_exception(ArgumentError,/Parts should be Integer greater than 0./)
-      expect{subnet.split_on(nil)}.to raise_exception(ArgumentError,/Parts should be Integer greater than 0./)
-      expect{subnet.split_on(7.24)}.to raise_exception(ArgumentError,/Parts should be Integer greater than 0./)
-      expect{subnet.split_on('Zorro')}.to raise_exception(ArgumentError,/Parts should be Integer greater than 0./)
+    it 'raises exception' do
+      expect{subnet.split_on(0)}.to raise_exception(ArgumentError)
+      expect{subnet.split_on(-1)}.to raise_exception(ArgumentError)
+      expect{subnet.split_on(nil)}.to raise_exception(ArgumentError)
+      expect{subnet.split_on(7.24)}.to raise_exception(ArgumentError)
+      expect{subnet.split_on('Zorro')}.to raise_exception(ArgumentError)
     end
 
   end
 
-  context 'parts = size' do
-    subnet = Subnet.new(DummyAddress.new(0),DummyAddress.new(10))
+  context 'when  passed <parts> param equals to subnet size' do
+    splitted = Subnet.new(DummyAddress.new(0),DummyAddress.new(10)).split_on(11)
 
-    it 'correct split' do
-      expect(subnet.split_on(11).length).to eq(11)
-      expect(subnet.split_on(11)[3].size).to eq(1) # TODO: ассерт "по пути"?
+    it 'splits correctly' do
+      expect(splitted.length).to eq(11)
     end
 
+    it 'has single address in part' do
+      expect(splitted[0].size).to eq(1)
+      expect(splitted[1].size).to eq(1)
+      expect(splitted[10].size).to eq(1)
+    end
   end
 
 end
 
+=begin
+
 # TODO: граничный случай?
+Не понимаю, как тестировать йельд. Передавать пустой блок?
+
+=end
+
 RSpec.describe Subnet, '#each' do
 
   subnet = Subnet.new(DummyAddress.new(1),DummyAddress.new(6))
@@ -145,105 +167,115 @@ end
 
 RSpec.describe Subnet, '#to_s' do
 
-  context 'hardcoded output' do
-    it 'context output' do
-      expect(Subnet.new(DummyAddress.new(2),DummyAddress.new(12)).to_s).to eq('2-12') # TODO: граничный случай?
-    end
+  it 'return correct string' do
+    expect(Subnet.new(DummyAddress.new(0),DummyAddress.new(1)).to_s).to eq('0-1')
   end
 
-  context 'with to_s method of childs' do
-    it 'context output' do
-      first = DummyAddress.new(2)
-      last = DummyAddress.new(12)
-      expect(Subnet.new(first,last).to_s).to eq(first.to_s + '-' + last.to_s) # TODO: дублируется логика тестируемого метода, лучше писать явно
+  context 'when subnet has only one address' do
+    it 'returns correct string' do
+      expect(Subnet.new(DummyAddress.new(0),DummyAddress.new(0)).to_s).to eq('0-0')
     end
   end
+=begin
 
+# TODO: дублируется логика тестируемого метода, лучше писать явно
+Тогда этот тест вообще можно удалить, он будет дублировать один из верхних.
+
+  it 'uses to_s method of childs ' do
+    first = DummyAddress.new(2)
+    last = DummyAddress.new(12)
+    expect(Subnet.new(first,last).to_s).to eq(first.to_s + '-' + last.to_s)
+  end
+
+=end
 end
 
 
 RSpec.describe Subnet, '#size' do
-
-  context 'with normal subnet' do
-    it 'size is correct' do
-      expect(Subnet.new(DummyAddress.new(0), DummyAddress.new(3)).size).to eq(4) # TODO: граничный случай?
-    end
+  it 'returns correct size' do
+      expect(Subnet.new(DummyAddress.new(0), DummyAddress.new(1)).size).to eq(2)
   end
 
-  context 'with one-address subnet' do
-    it 'size is correct' do
+  context 'when subnet has only one address' do
+    it 'returns correct size' do
       loopback = Subnet.new(DummyAddress.new(0), DummyAddress.new(0))
       expect(loopback.size).to eq(1)
     end
   end
-
-end
-# TODO: почему бы тесты на конструктор не поместить в самом верху?
-RSpec.describe Subnet, '#initialize' do
-
-  context 'args has different type' do
-    it 'raises TypeError' do
-      addr = DummyAddress.new(0)
-      other_type_addr = Ipv6Address.new(1) # TODO: в TDD не прокатит
-
-      expect{Subnet.new(addr, other_type_addr)}.to raise_error(TypeError,"Can't create subnet with different type of addresses") # TODO: к сообщению лучше не привязываться - оно может поменяться
-    end
-  end
-
-  context 'last >= first ' do
-    it 'correct subnet' do
-      subnet = Subnet.new(DummyAddress.new(0), DummyAddress.new(2))
-      expect(subnet.first.to_s).to eq('0')
-      expect(subnet.last.to_s).to eq('2')
-    end
-
-    it 'one-address subnet' do
-      loopback = Subnet.new(DummyAddress.new(1), DummyAddress.new(1))
-      expect(loopback.first <=> loopback.last).to be_truthy
-      expect(loopback.first <=> 1).to be_truthy
-    end
-  end
-
-  context 'first > last' do
-    it 'correct subnet' do
-      subnet = Subnet.new(DummyAddress.new(2), DummyAddress.new(0))
-      expect(subnet.first.to_s).to eq('0')
-      expect(subnet.last.to_s).to eq('2')
-    end
-  end
-
-  # TODO: initialize с nil?
 end
 
- # TODO: граничные случаи?
+
+
 RSpec.describe Subnet, '#include' do
-
-  subnet = Subnet.new(DummyAddress.new(1), DummyAddress.new(10)) # TODO: слишком большая подсеть для этих кейсов
-
-  it 'includes' do
-    expect(subnet.includes?(DummyAddress.new(1))).to be_truthy
-    expect(subnet.includes?(DummyAddress.new(5))).to be_truthy
-    expect(subnet.includes?(DummyAddress.new(10))).to be_truthy
-  end
-
-  it "doesn't include" do
-    expect(subnet.includes?(DummyAddress.new(0))).to be_falsey
-    expect(subnet.includes?(DummyAddress.new(11))).to be_falsey
-  end
-
-  it 'throws different type exception' do
-    expect{subnet.includes?(0)}.to raise_exception(TypeError, /Can accept.*type only/)
-  end
-
-end
+=begin
 
 # TODO: граничные случаи?
+Что в данном тесте можно принять за граничные значения?
+Отрицательных адресов не бывает, максимального адреса тоже.
+Добавил тесты для подсети из одного адреса, на этом мои полномочия всё.
+
+=end
+
+
+=begin
+
+# TODO: слишком большая подсеть для этих кейсов
+Почему это проблема? Цифры простые и понятные. Не вижу разницы между 1-2-3 и 1-5-10
+
+=end
+
+  context 'when pass argument of different type' do
+    it 'throws TypeError exception' do
+      subnet = Subnet.new(DummyAddress.new(1), DummyAddress.new(10))
+      expect{subnet.includes?(0)}.to raise_exception(TypeError)
+    end
+  end
+
+  context 'when subnet has 2 or more elements' do
+    subnet = Subnet.new(DummyAddress.new(1), DummyAddress.new(10))
+
+    it 'includes addresses from first to last' do
+      expect(subnet.includes?(DummyAddress.new(1))).to be_truthy
+      expect(subnet.includes?(DummyAddress.new(5))).to be_truthy
+      expect(subnet.includes?(DummyAddress.new(10))).to be_truthy
+    end
+
+    it "doesn't include addresses beyound the boundary " do
+      expect(subnet.includes?(DummyAddress.new(0))).to be_falsey
+      expect(subnet.includes?(DummyAddress.new(11))).to be_falsey
+    end
+  end
+
+  context 'when subnet has only one address' do
+    subnet = Subnet.new(DummyAddress.new(1), DummyAddress.new(1))
+
+    it 'includes this address' do
+      expect(subnet.includes?(DummyAddress.new(1))).to be_truthy
+    end
+
+    it 'does not include any other' do
+      expect(subnet.includes?(DummyAddress.new(0))).to be_falsey
+      expect(subnet.includes?(DummyAddress.new(2))).to be_falsey
+    end
+  end
+end
+
 RSpec.describe Subnet, '#intersects?' do
+
+=begin
+
+  # TODO: можно подсети поменьше ;)
+  И опять я задам вопрос "а что это изменит?" :)
+
+=end
+
 
   #   |subnet_left|      |subnet_right|
   #           |subnet_middle|
 
-  subnet_left = Subnet.new(DummyAddress.new(0), DummyAddress.new(3)) # TODO: можно подсети поменьше ;)
+
+
+  subnet_left = Subnet.new(DummyAddress.new(0), DummyAddress.new(3))
   subnet_middle = Subnet.new(DummyAddress.new(3), DummyAddress.new(6))
   subnet_right = Subnet.new(DummyAddress.new(6), DummyAddress.new(9))
 
@@ -261,7 +293,6 @@ RSpec.describe Subnet, '#intersects?' do
   end
 
   context 'with global subnet' do
-
     subnet_global = Subnet.new(DummyAddress.new(0), DummyAddress.new(9))
 
     it 'intersects' do
@@ -272,6 +303,27 @@ RSpec.describe Subnet, '#intersects?' do
       expect(subnet_global.intersects?(Subnet.new(DummyAddress.new(9), DummyAddress.new(0)))).to be_truthy
     end
 
+  end
+
+  context 'when both subnets are loopbacks' do
+    it 'intersect each other' do
+      subnet_0 = Subnet.new(DummyAddress.new(0),DummyAddress.new(0))
+      expect(subnet_0.intersects?(subnet_0)).to be_truthy
+    end
+  end
+
+  context 'when one subnet is loopback' do
+    subnet_0 = Subnet.new(DummyAddress.new(0),DummyAddress.new(0))
+
+    it 'intersects with bigger subnet' do
+      expect(subnet_left.intersects?(subnet_0)).to be_truthy
+      expect(subnet_0.intersects?(subnet_left)).to be_truthy
+    end
+
+    it 'does not intersect with bigger subnet' do
+      expect(subnet_0.intersects?(subnet_middle)).to be_falsey
+      expect(subnet_middle.intersects?(subnet_0)).to be_falsey
+    end
   end
 
 end
