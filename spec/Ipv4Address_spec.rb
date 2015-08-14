@@ -67,14 +67,15 @@ RSpec.describe Ipv4Address, "#initialize" do
 end
 
 
+
+
+RSpec.describe Ipv4Address, "#-(another)" do
 =begin
 
 # TODO: граничные значения?
 в конце теста есть два теста на граничные значения. Какие еще ожидаются?
 
 =end
-
-RSpec.describe Ipv4Address, "#-(another)" do
 
   context 'when addresses are the same' do
     it 'returns 1' do
@@ -141,18 +142,6 @@ end
 
 
 RSpec.describe Ipv4Address, '#to_s' do
-  it 'is string' do
-
-=begin
-
-# TODO: lol-тест
-EXPLAIN! EXPLAIN!
-
-=end
-
-    expect(Ipv4Address.new('1.1.1.1').to_s).to be_instance_of(String)
-  end
-
   it 'returns correct string value'  do
 =begin
 
@@ -168,10 +157,6 @@ end
 
 
 RSpec.describe Ipv4Address, '#to_i' do
-  it 'is integer' do
-    expect(Ipv4Address.new('1.1.1.1').to_i).to be_a_kind_of(Numeric)
-  end
-
   it 'returns correct integer value'  do
     expect(Ipv4Address.new('255.255.255.255').to_i).to eq(2**32-1)
   end
@@ -182,19 +167,17 @@ RSpec.describe Ipv4Address, '#next' do
 =begin
 
 # TODO: не все граничные значения учитываются
-Не понимаю, какие надо еще. Подразумевается 255.255.255.255? Зачем? Что даст этот тест, если оно работает для 0.0.0.1?
+Не понимаю, какие надо еще. Что даст этот тест, если оно работает для 0.0.0.1?
 
 =end
 
   it 'returns next address' do
-
 =begin
 
 # TODO: кейс сомнительный.
 Почему?
-
+Должно быть типа expect(Ipv4Address.new('0.0.0.1').next.to_s).to eq('0.0.0.2') ?
 =end
-
     expect(Ipv4Address.new('0.0.0.1').next <=> Ipv4Address.new('0.0.0.2')).to equal(0)
   end
 
@@ -208,22 +191,8 @@ end
 
 
 RSpec.describe Ipv4Address, '#prev' do
-=begin
-
-# TODO: не все граничные значения учитываются
-Не понимаю, какие надо еще. Подразумевается 255.255.255.255? Зачем? Что даст этот тест, если оно работает для 0.0.0.8?
-
-=end
-
-
   it 'returns previous address' do
-=begin
-
-# TODO: кейс сомнительный.
-Почему?
-
-=end
-    expect(Ipv4Address.new('0.0.0.8').prev <=> Ipv4Address.new('0.0.0.7')).to equal(0)
+    expect(Ipv4Address.new('0.0.0.8').prev.to_s).to eq('0.0.0.7')
   end
 
   context 'when ip out of range' do
@@ -231,14 +200,11 @@ RSpec.describe Ipv4Address, '#prev' do
       expect {Ipv4Address.new('0.0.0.0').prev}.to raise_error('Error: IP is out of range')
     end
   end
-
 end
 
 
 RSpec.describe Ipv4Address, '#+(step)' do
-
   context 'when step is positive' do
-
     it 'returns correct ip' do
       expect(Ipv4Address.new('0.0.0.8')+(0)).to eq(Ipv4Address.new('0.0.0.8').to_i)
       expect(Ipv4Address.new('0.0.0.8')+(1)).to eq(Ipv4Address.new('0.0.0.9').to_i)
