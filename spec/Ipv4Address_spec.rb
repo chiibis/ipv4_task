@@ -2,128 +2,200 @@ require 'iputils'
 
 
 RSpec.describe Ipv4Address, "#initialize" do
-  context 'generate from string' do
 
-    it 'correct num value' do # TODO: "it correct num value" - не читается
+  context 'when generate from string' do
+    it 'converts correctly' do
       expect(Ipv4Address.new('0.0.0.0').to_i).to eq(0)
-      expect(Ipv4Address.new('192.168.1.1').to_i).to eq(3232235777) # TODO: что за кейс?
+
+      # expect(Ipv4Address.new('192.168.1.1').to_i).to eq(3232235777) # TODO: что за кейс?
+      # просто взятое наобум значение.
+      # я переделаю, но реально не понимаю почему тестировать реальный айпи плохо.
+
+      expect(Ipv4Address.new('0.0.0.5').to_i).to eq(5)
       expect(Ipv4Address.new('255.255.255.255').to_i).to eq(2**32-1)
     end
 
+    context 'when string is not valid' do
+      context 'when string contains letters' do
+        it 'raises ArgumentError' do
+          expect {Ipv4Address.new('192.abbb.0.1')}.to raise_exception(ArgumentError)
+        end
+      end
+      context 'when octet contains >3 digits' do
+        it 'raises ArgumentError' do
+          expect {Ipv4Address.new('1.1.1.0001')}.to raise_exception(ArgumentError)
+        end
+      end
+      context 'when has empty octet' do
+        it 'raises ArgumentError' do
+          expect {Ipv4Address.new('1..1.1')}.to raise_exception(ArgumentError)
+        end
+      end
+      context 'when >4 octets' do
+        it 'raises ArgumentError' do
+          expect {Ipv4Address.new('1.1.1.1.1')}.to raise_exception(ArgumentError)
+        end
+      end
+      context 'when <4 octets' do
+        it 'raises ArgumentError' do
+          expect {Ipv4Address.new('192.168.0')}.to raise_exception(ArgumentError)
+        end
+      end
+      context 'when octet is greater than 255' do
+        it 'raises ArgumentError' do
+          expect {Ipv4Address.new('1.1.1.266')}.to raise_exception(ArgumentError)
+        end
+      end
+    end
+
   end
 
-  context 'generates from integer' do
-
-    it 'correct string value' do # TODO: - не читается
+  context 'when generates from number' do
+    it 'converts correctly' do
       expect(Ipv4Address.new(0).to_s).to eq('0.0.0.0')
-      expect(Ipv4Address.new(3232235777).to_s).to eq('192.168.1.1') # TODO: что за кейс?
+      expect(Ipv4Address.new(5).to_s).to eq('0.0.0.5')
       expect(Ipv4Address.new(2**32-1).to_s).to eq('255.255.255.255')
     end
 
-    it 'throws ex if invalid value' do
+    it 'throws ArgumentError if not valid value' do
       expect{Ipv4Address.new(2**32)}.to raise_exception(ArgumentError, /is not valid IPv4 numeric representation/)
-      expect{Ipv4Address.new(-111)}.to raise_exception(ArgumentError, /is not valid IPv4 numeric representation/) # TODO: -1 - граничное значение, -111 нет.
+      expect{Ipv4Address.new(-1)}.to raise_exception(ArgumentError, /is not valid IPv4 numeric representation/)
       expect{Ipv4Address.new(nil)}.to raise_exception(ArgumentError, /is not valid IPv4 numeric representation/)
     end
   end
+
 end
 
-# TODO: string_to_numeric - лучше ему быть приватным методом. Если нужно тестировать конструктор со строками и числами - лучше именно такие тесты и писать
-RSpec.describe Ipv4Address, "#string_to_numeric" do
-  test_ip = Ipv4Address.new(0)
 
-  it 'convert correctly' do
-    expect(test_ip.class.string_to_numeric('0.0.0.0')).to eq(0) # TODO: копия строки #19
-    expect(test_ip.class.string_to_numeric('81.95.27.2')).to eq(1365187330) # TODO: что за кейс?
-    expect(test_ip.class.string_to_numeric('255.255.255.255')).to eq(2**32-1)
-  end
-
-  context 'throws exception' do
-
-    # TODO: слишком специфичные разные кейсы - лучше в отдельные it разбить
-    it 'invalid format' do # TODO: - не читается.
-      expect {test_ip.class.string_to_numeric('192.abbb.0.1')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)  # TODO: к сообщениям  ошибок лучше не привязываться, т.к. они часто меняются. Если это не критично для кейса.
-      expect {test_ip.class.string_to_numeric('1.1.00000.000001')}.to raise_exception(ArgumentError, /is not valid IPv4 address/) # TODO: 1.1.0000.000001 чем-то лучше чем 1.1.1.0001 ?
-      expect {test_ip.class.string_to_numeric('1...1')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
-    end
-
-    it 'too few octets' do # TODO: а где too much octets? btw, 'it too few' - не читается.
-      expect {test_ip.class.string_to_numeric('....')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
-      expect {test_ip.class.string_to_numeric('192.168.0')}.to raise_exception(ArgumentError, /is not valid IPv4 address/)
-    end
-
-    it 'octet is greater, than 255' do # TODO: - не читается.
-      expect {test_ip.class.string_to_numeric('192.168.999.0')}.to raise_exception(ArgumentError, /is not valid IPv4 address/) # TODO: 999 - не граничное значение для октета.
-    end
-  end
-end
+=begin
 
 # TODO: граничные значения?
+в конце теста есть два теста на граничные значения. Какие еще ожидаются?
+
+=end
+
 RSpec.describe Ipv4Address, "#-(another)" do
-  context 'first address is greater' do
-    it 'amount is correct' do # TODO: - не читается.
+
+  context 'when addresses are the same' do
+    it 'returns 1' do
       ip = Ipv4Address.new('0.0.0.7')
-      expect(ip-ip).to eq(1) # TODO: отдельный кейс - отдельный it
-      expect(ip-Ipv4Address.new('0.0.0.6')).to eq(2) # TODO: что за кейс?
-      expect(ip-Ipv4Address.new('0.0.0.5')).to eq(3) # TODO: что за кейс?
+      expect(ip-ip).to eq(1)
     end
   end
 
-  context 'second address is greater' do
-    it 'amount is correct' do # TODO: - не читается.
+  context 'when first is greater' do
+    it 'returns correct amount' do
       ip = Ipv4Address.new('0.0.0.7')
-      expect(ip-ip).to eq(1) # TODO: копия строки 65
-      expect(ip-Ipv4Address.new('0.0.0.8')).to eq(2) # TODO: что за кейс?
-      expect(ip-Ipv4Address.new('0.0.0.9')).to eq(3) # TODO: что за кейс?
+      expect(ip-Ipv4Address.new('0.0.0.6')).to eq(2)
+      expect(ip-Ipv4Address.new('0.0.0.5')).to eq(3)
+=begin
+
+# TODO: что за кейс?
+# TODO: что за кейс?
+
+Просто проверяю, что функция возвращает правильное количество вот на таких значениях
+
+=end
+    end
+  end
+
+  context 'first is lower' do
+    it 'returns correct amount' do
+      ip = Ipv4Address.new('0.0.0.7')
+      expect(ip-Ipv4Address.new('0.0.0.8')).to eq(2)
+      expect(ip-Ipv4Address.new('0.0.0.9')).to eq(3)
     end
   end
 
   context 'boundary values' do
-    it 'amount is correct' do # TODO: - не читается.
+    it 'returns correct amount' do
       expect(Ipv4Address.new('255.255.255.255') - Ipv4Address.new('0.0.0.0')).to eq(2**32)
       expect(Ipv4Address.new('0.0.0.0') - Ipv4Address.new('255.255.255.255')).to eq(2**32)
     end
   end
+
 end
 
 
 RSpec.describe Ipv4Address, '#<=>' do
-  # TODO: три разных кейса - три разных it
-  it 'main success' do # TODO: - не читается.
-    expect(Ipv4Address.new('0.0.0.1') <=> Ipv4Address.new('0.0.0.1')).to equal(0)
-    expect(Ipv4Address.new('0.0.0.0') <=> Ipv4Address.new('0.0.0.3')).to equal(-1)
-    expect(Ipv4Address.new('0.0.0.3') <=> Ipv4Address.new('0.0.0.0')).to equal(1)
+
+  context 'when addresses are the same' do
+    it 'returns 0' do
+      expect(Ipv4Address.new('0.0.0.1') <=> Ipv4Address.new('0.0.0.1')).to equal(0)
+    end
   end
+
+  context 'when first is lower' do
+    it 'returns -1' do
+      expect(Ipv4Address.new('0.0.0.0') <=> Ipv4Address.new('0.0.0.3')).to equal(-1)
+    end
+  end
+
+  context 'when first is greater' do
+    it 'returns 1' do
+      expect(Ipv4Address.new('0.0.0.3') <=> Ipv4Address.new('0.0.0.0')).to equal(1)
+    end
+  end
+
 end
 
 
 RSpec.describe Ipv4Address, '#to_s' do
   it 'is string' do
-    expect(Ipv4Address.new('1.1.1.1').to_s).to be_instance_of(String) # TODO: lol-тест
+
+=begin
+
+# TODO: lol-тест
+EXPLAIN! EXPLAIN!
+
+=end
+
+    expect(Ipv4Address.new('1.1.1.1').to_s).to be_instance_of(String)
   end
 
-  it 'correct transformation'  do
-    expect(Ipv4Address.new(2**32-1).to_s).to eq('255.255.255.255') # TODO: только одна граница, где остальные? как это пересекается с тестами на конструхтор?
+  it 'returns correct string value'  do
+=begin
+
+# TODO: только одна граница, где остальные? как это пересекается с тестами на конструхтор?
+Пересекается, ровно поэтому и одна проверка.
+Не вижу смысла проверять для нескольких айпи, если корректно работает для одного.
+
+=end
+
+    expect(Ipv4Address.new(2**32-1).to_s).to eq('255.255.255.255')
   end
 end
 
 
 RSpec.describe Ipv4Address, '#to_i' do
   it 'is integer' do
-    expect(Ipv4Address.new('1.1.1.1').to_i).to be_a_kind_of(Numeric) # TODO: lol-тест
+    expect(Ipv4Address.new('1.1.1.1').to_i).to be_a_kind_of(Numeric)
   end
 
-  it 'correct transformation'  do # TODO: - не читается.
-    expect(Ipv4Address.new('255.255.255.255').to_i).to eq(2**32-1) # TODO: только одна граница, где остальные? как это пересекается с тестами на конструхтор?
+  it 'returns correct integer value'  do
+    expect(Ipv4Address.new('255.255.255.255').to_i).to eq(2**32-1)
   end
 end
 
 
-# TODO: не все граничные значения учитываются
 RSpec.describe Ipv4Address, '#next' do
+=begin
 
-  it 'main success' do # TODO: - не читается.
-    expect(Ipv4Address.new('0.0.0.1').next <=> Ipv4Address.new('0.0.0.2')).to equal(0) # TODO: кейс сомнительный.
+# TODO: не все граничные значения учитываются
+Не понимаю, какие надо еще. Подразумевается 255.255.255.255? Зачем? Что даст этот тест, если оно работает для 0.0.0.1?
+
+=end
+
+  it 'returns next address' do
+
+=begin
+
+# TODO: кейс сомнительный.
+Почему?
+
+=end
+
+    expect(Ipv4Address.new('0.0.0.1').next <=> Ipv4Address.new('0.0.0.2')).to equal(0)
   end
 
   context 'when ip out of range' do
@@ -134,15 +206,28 @@ RSpec.describe Ipv4Address, '#next' do
 
 end
 
-# TODO: не все граничные значения учитываются
-RSpec.describe Ipv4Address, '#prev' do
 
-  it 'main success' do # TODO: - не читается.
-    expect(Ipv4Address.new('0.0.0.8').prev <=> Ipv4Address.new('0.0.0.7')).to equal(0) # TODO: кейс сомнительный.
+RSpec.describe Ipv4Address, '#prev' do
+=begin
+
+# TODO: не все граничные значения учитываются
+Не понимаю, какие надо еще. Подразумевается 255.255.255.255? Зачем? Что даст этот тест, если оно работает для 0.0.0.8?
+
+=end
+
+
+  it 'returns previous address' do
+=begin
+
+# TODO: кейс сомнительный.
+Почему?
+
+=end
+    expect(Ipv4Address.new('0.0.0.8').prev <=> Ipv4Address.new('0.0.0.7')).to equal(0)
   end
 
   context 'when ip out of range' do
-    it 'raise an exception' do
+    it 'raises an exception' do
       expect {Ipv4Address.new('0.0.0.0').prev}.to raise_error('Error: IP is out of range')
     end
   end
@@ -153,29 +238,44 @@ end
 RSpec.describe Ipv4Address, '#+(step)' do
 
   context 'when step is positive' do
-    it 'main success' do # TODO: - не читается.
+
+    it 'returns correct ip' do
       expect(Ipv4Address.new('0.0.0.8')+(0)).to eq(Ipv4Address.new('0.0.0.8').to_i)
       expect(Ipv4Address.new('0.0.0.8')+(1)).to eq(Ipv4Address.new('0.0.0.9').to_i)
       expect(Ipv4Address.new('0.0.0.8')+(3)).to eq(Ipv4Address.new('0.0.0.11').to_i)
     end
 
-    it 'too big step raises an exception' do # TODO: - не читается.
-      expect {Ipv4Address.new('255.255.255.250')+(10)}.to raise_error('Error: IP is out of range') # TODO: что за кейс? явно не граничный
-    end
+    context 'when step is too big' do
+      it 'raises error' do
+        expect {Ipv4Address.new('255.255.255.255')+(1)}.to raise_error('Error: IP is out of range')
 
+=begin
+        # TODO: что за кейс? явно не граничный
+        expect {Ipv4Address.new('255.255.255.250')+(10)}.to raise_error('Error: IP is out of range')
+
+        почему это плохо?
+        тест читается, все цифры адекватные. Шаг достаточно явный, чтобы читающий сразу понял, что происходит.
+        какие реальные (а не стилевые) преимущества у 255.255.255.255 + 1?
+=end
+
+      end
+    end
   end
 
-  context 'when step is negative number' do
-    it 'main success' do # TODO: - не читается.
-      expect(Ipv4Address.new('0.0.0.8')+(-1)).to eq(Ipv4Address.new('0.0.0.7').to_i) # TODO: -1? слишком круто для main success
+  context 'when step is negative' do
+
+    it 'returns correct ip' do
+      expect(Ipv4Address.new('0.0.0.8')+(-1)).to eq(Ipv4Address.new('0.0.0.7').to_i)
       expect(Ipv4Address.new('0.0.0.8')+(-3)).to eq(Ipv4Address.new('0.0.0.5').to_i)
     end
 
-    it 'too big step raises an exception' do # TODO: - не читается.
-      expect {Ipv4Address.new('0.0.0.8')+(-10)}.to raise_error('Error: IP is out of range') # TODO: что за кейс? явно не граничный
+    context 'when step is too big' do
+      it 'raises error' do
+        expect {Ipv4Address.new('0.0.0.0')+(-1)}.to raise_error('Error: IP is out of range')
+      end
     end
-  end
 
+  end
 end
 
 
